@@ -53,7 +53,9 @@ def cases_dispo(g,i,j,action):
 
 #cases_dispo(g,9,0,2)
 
-#proba d'aller a la case voulu ou a sa droite ou a sa gauche selon l'incertitude et accessibilite 
+
+#Calcul des probas d'aller en x et a droite et a gauche de x 
+#prend en compte l'incertain
 def probas_action(g,i,j,p,action):
     probas = [0]*3
     cases = cases_dispo(g,i,j,action)
