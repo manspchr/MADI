@@ -13,7 +13,7 @@ import numpy as np
 import p2
 from matplotlib import pyplot as plt
 import grille
-
+import outils as ot
 # Definition des valeurs par defaut
 default_tests = 1
 default_nbLignes = 10
@@ -37,7 +37,7 @@ def impact_size(sizes,
         somme2_it =0 
         somme2_t =0
         for k in range(nbr_tests):
-            g = grille.Grille(taille[0],taille[1],2,0.2,0.2,0.2,0.2,0.2).g
+            g = grille.Grille(taille[0],taille[1],2,0.2,0.2,0.2,0.2,0.2,[0,1,2,3,4],1000).g
             #print(g)
             #print("run "+str(k+1)+" out of "+str(nbr_tests))
             # iteration de la valeur
@@ -95,8 +95,7 @@ def impact_gamma(interval_gamma,
         somme2_it =0 
         somme2_t =0
         for k in range(nbr_tests):
-            g= np.zeros((nbLignes,nbCol), dtype=np.int)
-            p2.colordraw(g,nbLignes,nbCol,0.2,0.2,0.2,0.2,0.2)
+            g = grille.Grille(nbLignes,nbCol,2,0.2,0.2,0.2,0.2,0.2,[0,1,2,3,4],1000).g
             #print(g)
             #print("run "+str(k+1)+" out of "+str(nbr_tests))
             d,v,t, time = p2.iteration_de_la_valeur(g,p,gamma,epsilon)
@@ -151,14 +150,13 @@ def impact_p(interval_p,
         somme2_it =0 
         somme2_t =0
         for k in range(nbr_tests):
-            g= np.zeros((nbLignes,nbCol), dtype=np.int)
-            p2.colordraw(g,nbLignes,nbCol,0.2,0.2,0.2,0.2,0.2)
+            g = grille.Grille(nbLignes,nbCol,2,0.2,0.2,0.2,0.2,0.2,[0,1,2,3,4],1000).g
             #print(g)
             #print("run "+str(k+1)+" out of "+str(nbr_tests))
             d,v,t, time = p2.iteration_de_la_valeur(g,p,gamma,epsilon)
             somme1_it += t
             somme1_t += time
-            d,v,t, time = p2.iteration_de_la_politique(g,p,gamma,epsilon)
+            d,v,t,time = p2.iteration_de_la_politique(g,p,gamma,epsilon)
             somme2_it += t
             somme2_t += time
             line = pd.Series({'p' : p,
@@ -186,7 +184,7 @@ def impact_p(interval_p,
     plt.ylabel("Durée d'execution")
         
     plt.show()
-#
+
 #sizes = [[5,5],
 #         [5,10],
 #         [10,10],
@@ -207,7 +205,7 @@ def impact_p(interval_p,
 #impact_p(interval_p)
 #
 #
-#
+
 
 ### Question 2 : On remplace le cout c(x) par la fonction c^q(x) ou q>1.
 ### Etudier à partir d'exemples comment varie la solution du problème lorque q augmente et commenter ce que vous avez observés.
@@ -223,16 +221,15 @@ def impact_q(variation_q,
     for q in variation_q:
         print(q)
         new_couts = [x**q for x in couts]
-        g = grille.Grille(nbLignes,nbCol,2,0.2,0.2,0.2,0.2,0.2,new_couts).g
-        p2.iteration_de_la_valeur(g,p,gamma,epsilon)
+        g = grille.Grille(nbLignes,nbCol,2,0.2,0.2,0.2,0.2,0.2,new_couts,1000).g
+        d,v,t,time = p2.iteration_de_la_valeur(g,p,gamma,epsilon)
+        print(ot.from_action_to_dir(d,g))
 
-#impact_q(variation_q)
-
+impact_q(variation_q)
 
 ### Question 3 : On décide maintenant qu'une trajectoire est meilleure qu'une 
 ### autre si elle traverse moins de cases noires, ou en cas d'égalité moins de cases
 ### rouges, ...
-
 
 ## TODO : mettre une recompense plus élevée !
         # sinon pas interessant d'aller jusqu'au bout de la grille
@@ -243,7 +240,8 @@ def resolution_nbr_cases(nbLignes = default_nbLignes,
                          epsilon = default_epsilon):
     size = nbLignes * nbCol
     couts = [0, 1, size ** 1, size ** 2, size ** 3]
-    g = grille.Grille(nbLignes,nbCol,2,0.2,0.2,0.2,0.2,0.2,couts).g
+    reward = 1000
+    g = grille.Grille(nbLignes,nbCol,2,0.2,0.2,0.2,0.2,0.2,couts,reward).g
     p2.iteration_de_la_valeur(g,p,gamma,epsilon)
 
-resolution_nbr_cases()
+#resolution_nbr_cases()

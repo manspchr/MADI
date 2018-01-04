@@ -3,7 +3,7 @@ import numpy as np
 import random
 
 class Grille():    
-    def __init__(self,nbLignes,nbCol,zoom,pblanc,pverte,pbleue,prouge,pnoire, couts):
+    def __init__(self,nbLignes,nbCol,zoom,pblanc,pverte,pbleue,prouge,pnoire,couts,reward):
         
         self.nbLignes = nbLignes
         self.nbCol = nbCol
@@ -20,7 +20,7 @@ class Grille():
         self.weight[0]=0
         
         # on définit les couts pour
-        self.reward_target = 1000
+        self.reward = reward
         self.couts = couts
         
         
@@ -91,7 +91,7 @@ class Grille():
                     cout_case = self.couts[c]
                     if (i==len(self.g)-1 and j==len(self.g[0])-1):
                         ## dernière case : on met le reward à 1000
-                        cout_case = - self.reward_target
+                        cout_case = - self.reward
                 else :
                     z= random.uniform(0,1)
 
@@ -281,7 +281,7 @@ class Grille():
 #pbleue=0.25
 #prouge=0.2
 #pnoire=0.15
-#g = Grille(5,5,2,pblanc,pverte,pbleue,prouge,pnoire,[0,1,2,3,4])
+#g = Grille(5,5,2,pblanc,pverte,pbleue,prouge,pnoire,[0,1,2,3,4],1000)
 #g.Mafenetre.mainloop()
 
 # TODO : faire varier les couts, tels que ce soient une entree

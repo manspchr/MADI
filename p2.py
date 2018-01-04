@@ -35,7 +35,7 @@ def iteration_de_la_valeur(g,p,gamma,epsilon):
     for i in range(len(val_etats)):
             for j in range(len(val_etats[0])):
                 d[i][j] = np.argmax(q[i][j])
-    print(ot.from_action_to_dir(d,g))
+  #  print(ot.from_action_to_dir(d,g))
 #   # print(val_etats)
 #    print(t)  
     end = tm.time()
@@ -84,7 +84,7 @@ def iteration_de_la_politique(g,p,gamma,epsilon):
                 arg = np.array(arg)
                 d[i][j] = np.argmax(arg)
 #    print(g)
-    print(ot.frot_action_to_dir(d,g))
+ #   print(ot.from_action_to_dir(d,g))
 #    #print(v)
 #    print(t)
     end = tm.time()
@@ -166,9 +166,9 @@ def iteration_de_la_politique(g,p,gamma,epsilon):
 #d,v = pl(g, len(g), len(g[0]), liste_actions, rewards, p, gamma, epsilon)
 #print(d,v)
 #print(g)
-
-grille = grille.Grille(10,15,2,0.2,0.2,0.2,0.2,0.2,[0,1,2,3,4])
-grille.Mafenetre.mainloop() #Affichage 
+#
+#grille = grille.Grille(10,15,2,0.2,0.2,0.2,0.2,0.2,[0,1,2,3,4], 1000)
+#grille.Mafenetre.mainloop() #Affichage 
 #iteration_de_la_politique(grille.g,0.6,0.9,0.0001)
 #
 
