@@ -2,6 +2,7 @@
 import numpy as np
 import outils as ot
 import time as tm
+import grille
 #import gurobipy as grb
 
 # definition des actions
@@ -25,7 +26,7 @@ def iteration_de_la_valeur(g,p,gamma,epsilon):
         for i in range(len(val_etats)):#TODO : plus propre de mettre nbLignes non ?
             for j in range(len(val_etats[0])): # pareil 
                 for action in liste_actions:
-                    r = g[i][j]                     
+                    r = - g[i][j]                     
                     q[i][j][action] = r + gamma * ot.sum_p_v(g,val_etats,i,j,p,action)
                 val_etats[i][j] = max(q[i][j])
     
@@ -68,7 +69,7 @@ def iteration_de_la_politique(g,p,gamma,epsilon):
         #evaluation de la politique courante
         for i in range(len(val_etats)):
             for j in range(len(val_etats[0])):
-                r = g[i][j] 
+                r = -g[i][j] 
                 #arrivé au but
                 val_etats[i][j] =  r + gamma * ot.sum_p_v(g,val_etats,i,j,p,d[i][j])
     
@@ -78,7 +79,7 @@ def iteration_de_la_politique(g,p,gamma,epsilon):
                 arg = []
                 for action in liste_actions:
                     #arrivé au but
-                    r = g[i][j] 
+                    r = -g[i][j] 
                     arg.append(r + gamma*ot.sum_p_v(g,val_etats,i,j,p,action))
                 arg = np.array(arg)
                 d[i][j] = np.argmax(arg)
@@ -166,7 +167,8 @@ def iteration_de_la_politique(g,p,gamma,epsilon):
 #print(d,v)
 #print(g)
 
-#grille = grille.Grille(10,15,2,0.2,0.2,0.2,0.2,0.2)
+grille = grille.Grille(10,15,2,0.2,0.2,0.2,0.2,0.2,[0,1,2,3,4])
+grille.Mafenetre.mainloop() #Affichage 
 #iteration_de_la_politique(grille.g,0.6,0.9,0.0001)
 #
 

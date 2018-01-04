@@ -19,11 +19,9 @@ class Grille():
         self.weight= np.ones(5, dtype=np.int)
         self.weight[0]=0
         
-        
         # on définit les couts pour
-        self.cible = 1000
+        self.reward_target = 1000
         self.couts = couts
-        self.reward =[ -x for x in self.couts]
         
         
 #         self.PosX = PosX
@@ -67,10 +65,10 @@ class Grille():
     
     #coloration grille 
     def colordraw(self):
-        random.seed(1)      
-        np.random.seed(1)
-        
-        
+#        random.seed(1)      
+#        np.random.seed(1)
+#        
+#        
         mygreen="#1AD22C"
         myblue="#0B79F7"
         tk.mygrey="#E8E8EB"
@@ -90,36 +88,36 @@ class Grille():
                 if (i==0 and j==0) or (i==0 and j==1) or (i==1  and j==0) or (i==len(self.g)-1 and j==len(self.g[0])-1) or (i==len(self.g)-2 and j==len(self.g[0])-1) or (i==len(self.g)-1 and j==len(self.g[0])-2):
 #                     print(i,j)
                     c = np.random.randint(1,3+1)
-                    r = self.reward[c]
+                    cout_case = self.couts[c]
                     if (i==len(self.g)-1 and j==len(self.g[0])-1):
                         ## dernière case : on met le reward à 1000
-                        r = 1000
+                        cout_case = - self.reward_target
                 else :
                     z= random.uniform(0,1)
 
                     if z < self.pblanc:
                         #couleur c, rewards r
                         c=0
-                        r= self.reward[c]
+                        cout_case= self.couts[c]
                     else:
                         if z < self.pblanc+ self.pverte:
                             c=1
-                            r= self.reward[c]
+                            cout_case= self.couts[c]
 
                         else:
                             if z < self.pblanc+ self.pverte + self.pbleue:
                                 c=2
-                                r= self.reward[c]
+                                cout_case= self.couts[c]
                             else:
                                 if z< self.pblanc+ self.pverte + self.pbleue +self.prouge:
                                     c=3
-                                    r= self.reward[c]
+                                    cout_case= self.couts[c]
                                 else:
                                     c=4
-                                    r= self.reward[c]
+                                    cout_case= self.couts[c]
 
                 if c>0:
-                    self.g[i,j]=r
+                    self.g[i,j]=cout_case
                     self.Canevas.create_oval(x+self.zoom*(10-3),y+self.zoom*(10-3),x+self.zoom*(10+3),y+self.zoom*(10+3),width=1,outline=color[c],fill=color[c])
                 else:
                     self.Canevas.create_rectangle(x, y, x+self.zoom*20, y+self.zoom*20, fill=mywalls)
@@ -181,7 +179,7 @@ class Grille():
 
     def haut(self,li,cj):
         # deplacement vers le haut
-        if li>0 and self.g[li-1,cj]>0:
+        if li>0 and self.g[li-1,cj]!=0:
             self.PosY -= 20*self.zoom
             self.cost[self.g[li-1,cj]]+= self.g[li-1,cj]  
         else:
@@ -189,7 +187,7 @@ class Grille():
 
     def bas(self,li,cj):
            # deplacement vers le bas
-        if li<self.nbLignes-1 and self.g[li+1,cj]>0:
+        if li<self.nbLignes-1 and self.g[li+1,cj]!=0:
             self.PosY += 20*self.zoom
             self.cost[self.g[li+1,cj]]+=self.g[li+1,cj]
         else:
@@ -197,7 +195,7 @@ class Grille():
         
     def droite(self,li,cj):
         # deplacement vers la droite
-        if cj< self.nbCol-1 and self.g[li,cj+1]>0:
+        if cj< self.nbCol-1 and self.g[li,cj+1]!=0:
             self.PosX += 20*self.zoom
             self.cost[self.g[li,cj+1]]+=self.g[li,cj+1] 
         else:
@@ -205,7 +203,7 @@ class Grille():
         
     def gauche(self,li,cj):
         # deplacement vers la gauche
-        if cj >0 and self.g[li,cj-1]>0:
+        if cj >0 and self.g[li,cj-1]!=0:
             self.PosX -= 20*self.zoom
             self.cost[self.g[li,cj-1]]+=self.g[li,cj-1] 
         else:
@@ -276,14 +274,14 @@ class Grille():
         self.ws = tk.Label(self.Mafenetre, text='     total = '+str(self.cost[0]),fg=myblack,font = "Verdana "+str(int(5*self.zoom))+" bold")
         self.ws.pack(side=tk.LEFT,padx=5,pady=5) 
     
-#
+
 #        
 #pblanc=0.1
 #pverte=0.3
 #pbleue=0.25
 #prouge=0.2
 #pnoire=0.15
-#g = Grille(5,5,2,pblanc,pverte,pbleue,prouge,pnoire)
+#g = Grille(5,5,2,pblanc,pverte,pbleue,prouge,pnoire,[0,1,2,3,4])
 #g.Mafenetre.mainloop()
 
 # TODO : faire varier les couts, tels que ce soient une entree
