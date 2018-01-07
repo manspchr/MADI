@@ -14,6 +14,8 @@ import p2
 from matplotlib import pyplot as plt
 import grille
 import outils as ot
+import random
+
 # Definition des valeurs par defaut
 default_tests = 1
 default_nbLignes = 10
@@ -29,13 +31,24 @@ def impact_size(sizes,
                 p = default_p,
                 gamma = default_gamma,
                 epsilon = default_epsilon):
-    df = pd.DataFrame(columns = ["dimensions", "taille", "iter_val", "iter_pol", "time_val", "time_pol"])
+    df = pd.DataFrame(columns = ["dimensions",
+                                 "taille",
+                                 "iter_val",
+                                 "iter_pol",
+                                 #"iter_pl",
+                                 "time_val",
+                                 "time_pol",
+                                 #"time_pl",
+                                 ])
     for i, taille in enumerate(sizes) : 
         print(taille)
         somme1_it = 0
         somme1_t = 0
         somme2_it =0 
         somme2_t =0
+       # TODO : à decommenter pour le PL
+        #somme3_it = 0
+        #somme3_t=0
         for k in range(nbr_tests):
             g = grille.Grille(taille[0],taille[1],2,0.2,0.2,0.2,0.2,0.2,[0,1,2,3,4],1000).g
             #print(g)
@@ -48,22 +61,30 @@ def impact_size(sizes,
             d,v,t, time = p2.iteration_de_la_politique(g,p,gamma,epsilon)
             somme2_it += t
             somme2_t += time
+            # TODO : à decommenter avec le PL
+            #d,v,t,time = p2.pl(g,p,gamma,epsilon)
+            #somme3_it += t
+            #somme3_t += time
             # ajouter le pl
             line = pd.Series({'dimensions' : taille,
                               'taille' : taille[0]*taille[1],
                               'iter_val' : somme1_it/nbr_tests,
                               'iter_pol': somme2_it/nbr_tests,
+                              #'iter_pl' : somme3_it/nbr_tests,
                               'time_val': somme1_t/nbr_tests,
-                              'time_pol': somme2_t/nbr_tests})
+                              'time_pol': somme2_t/nbr_tests,
+                              #'time_pl': somme3_t/nbr_tests,
+                              })
         df = df.append(line, ignore_index=True)
         
     # Affichage des résultats    
     print(df)
-    
+  
     plt.figure(1)
     ax1 = plt.subplot(211)
     plt.scatter(df.taille, df.iter_val, label = "Iteration de la valeur")
-    plt.scatter(df.taille, df.iter_pol, label = "Iteration de la politique")
+    plt.scatter(df.taille, df.iter_pol, label = "Iteration de la politique")    
+   # plt.scatter(df.taille, df.iter_pl, label = "Programmation mathématique")
     #plt.xlabel("Taille de l'instance")
     plt.ylabel("Nombre d'itérations")
     plt.setp(ax1.get_xticklabels(), visible=False)
@@ -72,10 +93,11 @@ def impact_size(sizes,
     
     plt.subplot(212, sharex = ax1)
     plt.scatter(df.taille, df.time_val, label = "Iteration de la valeur")
-    plt.scatter(df.taille, df.time_pol, label = "Iteration de la valeur")
+    plt.scatter(df.taille, df.time_pol, label = "Iteration de la politique")
+  #  plt.scatter(df.taille, df.time_pl, label = "Programmation mathématique")
     plt.xlabel("Taille de l'instance")
     plt.ylabel("Durée d'execution")
-        
+    
     plt.show()
     
 
@@ -87,7 +109,14 @@ def impact_gamma(interval_gamma,
                  nbCol = default_nbCol,
                  p = default_p,
                  epsilon = default_epsilon):
-    df = pd.DataFrame(columns = ["gamma", "iter_val", "iter_pol", "time_val", "time_pol"])
+    df = pd.DataFrame(columns = ["gamma",
+                                 "iter_val",
+                                 "iter_pol",
+                                 #"iter_pl",
+                                 "time_val",
+                                 "time_pol",
+                                 #"time_pl",
+                                 ])
     for gamma in np.arange(0, 1, 0.1):
         print("gamma = "+ str(gamma))
         somme1_it = 0
@@ -104,11 +133,19 @@ def impact_gamma(interval_gamma,
             d,v,t, time = p2.iteration_de_la_politique(g,p,gamma,epsilon)
             somme2_it += t
             somme2_t += time
+            #TODO : à decommenter avec le PL
+            #d,v,t,time = p2.pl(g,p,gamma,epsilon)
+            #somme3_it += t
+            #somme3_t += time
+            # ajouter le pl
             line = pd.Series({'gamma' : gamma,
                               'iter_val' : somme1_it/nbr_tests,
                               'iter_pol': somme2_it/nbr_tests,
+                              #'iter_pl' : somme3_it/nbr_tests,
                               'time_val': somme1_t/nbr_tests,
-                              'time_pol': somme2_t/nbr_tests})
+                              'time_pol': somme2_t/nbr_tests,
+                              #'time_pl': somme3_t/nbr_tests,
+                              })
         df = df.append(line, ignore_index=True)
     
     print(df)
@@ -117,7 +154,8 @@ def impact_gamma(interval_gamma,
     ax1 = plt.subplot(211)
     plt.scatter(df.gamma, df.iter_val, label = "Iteration de la valeur")
     plt.scatter(df.gamma, df.iter_pol, label = "Iteration de la politique")
-    #plt.xlabel("Taille de l'instance")
+    # plt.scatter(df.gamma, df.iter_pl, label = "Programmation mathématique")
+
     plt.ylabel("Nombre d'itérations")
     plt.setp(ax1.get_xticklabels(), visible=False)
     
@@ -126,6 +164,8 @@ def impact_gamma(interval_gamma,
     plt.subplot(212, sharex = ax1)
     plt.scatter(df.gamma, df.time_val, label = "Iteration de la valeur")
     plt.scatter(df.gamma, df.time_pol, label = "Iteration de la valeur")
+    # plt.scatter(df.gamma, df.time_pl, label = "Programmation mathématique")
+
     plt.xlabel("Valeur de Gamma")
     plt.ylabel("Durée d'execution")
         
@@ -142,7 +182,14 @@ def impact_p(interval_p,
              nbCol = default_nbCol,
              gamma = default_gamma,
              epsilon = default_epsilon):
-    df = pd.DataFrame(columns = ["p", "iter_val", "iter_pol", "time_val", "time_pol"])
+    df = pd.DataFrame(columns = ["p", 
+                                 "iter_val",
+                                 "iter_pol",
+                                 #"iter_pl",
+                                 "time_val",
+                                 "time_pol",
+                                 #"time_pl",
+                                 ])
     for p in interval_p:
         print("p = "+ str(p))
         somme1_it = 0
@@ -159,11 +206,19 @@ def impact_p(interval_p,
             d,v,t,time = p2.iteration_de_la_politique(g,p,gamma,epsilon)
             somme2_it += t
             somme2_t += time
+            #TODO : à decommenter avec le PL
+            #d,v,t,time = p2.pl(g,p,gamma,epsilon)
+            #somme3_it += t
+            #somme3_t += time
+            # ajouter le pl
             line = pd.Series({'p' : p,
                               'iter_val' : somme1_it/nbr_tests,
                               'iter_pol': somme2_it/nbr_tests,
+                              #'iter_pl' : somme3_it/nbr_tests,
                               'time_val': somme1_t/nbr_tests,
-                              'time_pol': somme2_t/nbr_tests})
+                              'time_pol': somme2_t/nbr_tests,
+                              #'time_pl': somme3_t/nbr_tests,
+                              })
         df = df.append(line, ignore_index=True)
     
     print(df)
@@ -172,6 +227,8 @@ def impact_p(interval_p,
     ax1 = plt.subplot(211)
     plt.scatter(df.p, df.iter_val, label = "Iteration de la valeur")
     plt.scatter(df.p, df.iter_pol, label = "Iteration de la politique")
+    # plt.scatter(df.p, df.iter_pl, label = "Programmation mathématique")
+
     plt.ylabel("Nombre d'itérations")
     plt.setp(ax1.get_xticklabels(), visible=False)
     
@@ -179,12 +236,17 @@ def impact_p(interval_p,
     
     plt.subplot(212, sharex = ax1)
     plt.scatter(df.p, df.time_val, label = "Iteration de la valeur")
-    plt.scatter(df.p, df.time_pol, label = "Iteration de la valeur")
+    plt.scatter(df.p, df.time_pol, label = "Iteration de la politique")
+    # plt.scatter(df.p, df.time_pl, label = "Programmation mathématique")
+
     plt.xlabel("Valeur de p")
     plt.ylabel("Durée d'execution")
         
     plt.show()
-
+#
+#
+## Etude des impacts et affichages des courbes
+#
 #sizes = [[5,5],
 #         [5,10],
 #         [10,10],
@@ -209,7 +271,7 @@ def impact_p(interval_p,
 
 ### Question 2 : On remplace le cout c(x) par la fonction c^q(x) ou q>1.
 ### Etudier à partir d'exemples comment varie la solution du problème lorque q augmente et commenter ce que vous avez observés.
-
+    
 variation_q = range(1,10)
 def impact_q(variation_q,
              nbLignes = default_nbLignes,
@@ -219,20 +281,21 @@ def impact_q(variation_q,
              epsilon = default_epsilon):
     couts = [0,1,2,3,4]
     for q in variation_q:
+        random.seed(1)
+        np.random.seed(1)
         print(q)
         new_couts = [x**q for x in couts]
         g = grille.Grille(nbLignes,nbCol,2,0.2,0.2,0.2,0.2,0.2,new_couts,1000).g
         d,v,t,time = p2.iteration_de_la_valeur(g,p,gamma,epsilon)
         print(ot.from_action_to_dir(d,g))
 
-impact_q(variation_q)
+#impact_q(variation_q)
 
 ### Question 3 : On décide maintenant qu'une trajectoire est meilleure qu'une 
 ### autre si elle traverse moins de cases noires, ou en cas d'égalité moins de cases
 ### rouges, ...
 
-## TODO : mettre une recompense plus élevée !
-        # sinon pas interessant d'aller jusqu'au bout de la grille
+## TODO : observer l'impact de la variation de la recompense.
 def resolution_nbr_cases(nbLignes = default_nbLignes,
                          nbCol = default_nbCol,
                          p = default_p,
@@ -241,7 +304,10 @@ def resolution_nbr_cases(nbLignes = default_nbLignes,
     size = nbLignes * nbCol
     couts = [0, 1, size ** 1, size ** 2, size ** 3]
     reward = 1000
-    g = grille.Grille(nbLignes,nbCol,2,0.2,0.2,0.2,0.2,0.2,couts,reward).g
-    p2.iteration_de_la_valeur(g,p,gamma,epsilon)
+    grid = grille.Grille(nbLignes,nbCol,2,0.2,0.2,0.2,0.2,0.2,couts,reward)
+    d,v,t,time = p2.iteration_de_la_valeur(grid.g,p,gamma,epsilon)
+    print(ot.from_action_to_dir(d,grid.g))
 
-#resolution_nbr_cases()
+    #grid.Mafenetre.mainloop()
+    
+resolution_nbr_cases()

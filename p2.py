@@ -2,7 +2,7 @@
 import numpy as np
 import outils as ot
 import time as tm
-import grille
+import grille as gr
 #import gurobipy as grb
 
 # definition des actions
@@ -26,7 +26,7 @@ def iteration_de_la_valeur(g,p,gamma,epsilon):
         for i in range(len(val_etats)):#TODO : plus propre de mettre nbLignes non ?
             for j in range(len(val_etats[0])): # pareil 
                 for action in liste_actions:
-                    r = - g[i][j]                     
+                    r = - g[i][j][1]                     
                     q[i][j][action] = r + gamma * ot.sum_p_v(g,val_etats,i,j,p,action)
                 val_etats[i][j] = max(q[i][j])
     
@@ -35,9 +35,6 @@ def iteration_de_la_valeur(g,p,gamma,epsilon):
     for i in range(len(val_etats)):
             for j in range(len(val_etats[0])):
                 d[i][j] = np.argmax(q[i][j])
-  #  print(ot.from_action_to_dir(d,g))
-#   # print(val_etats)
-#    print(t)  
     end = tm.time()
     time = end - start
     return d,val_etats,t, time 
@@ -69,7 +66,7 @@ def iteration_de_la_politique(g,p,gamma,epsilon):
         #evaluation de la politique courante
         for i in range(len(val_etats)):
             for j in range(len(val_etats[0])):
-                r = -g[i][j] 
+                r = -g[i][j][1]
                 #arrivé au but
                 val_etats[i][j] =  r + gamma * ot.sum_p_v(g,val_etats,i,j,p,d[i][j])
     
@@ -79,7 +76,7 @@ def iteration_de_la_politique(g,p,gamma,epsilon):
                 arg = []
                 for action in liste_actions:
                     #arrivé au but
-                    r = -g[i][j] 
+                    r = -g[i][j][1]
                     arg.append(r + gamma*ot.sum_p_v(g,val_etats,i,j,p,action))
                 arg = np.array(arg)
                 d[i][j] = np.argmax(arg)
@@ -91,22 +88,22 @@ def iteration_de_la_politique(g,p,gamma,epsilon):
     time = end - start
     return d,val_etats,t, time
 
+# TODO : decommenter et verifier que ca marche
 #
-#
-#def pl(g,nbLignes,nbCol,liste_actions,rewards,p,gamma,epsilon):
+#def pl(g,p,gamma,epsilon):
+#    global liste_actions
+#    start = tm.time()
 #
 #    # Create a new model
 #    m = grb.Model("test")
 #
-#
 #    val_etats = []
 #
-#
 #    # Create variables
-#    for i in range(nbLignes):
-#        for j in range(nbCol):
+#    for i in range(len(g[0])): # EST-ce que c'est pas simplement len(g)
+#        for j in range(len(g[1])): # ET len(g[0]) ?
 #            n = "v["+str(i)+"]["+str(j)+"]"
-#            r = g[i][j]
+#            r = - g[i][j][1]
 #            x = m.addVar(vtype=grb.GRB.CONTINUOUS, name=n)
 #            val_etats.append(x)
 #
@@ -119,24 +116,21 @@ def iteration_de_la_politique(g,p,gamma,epsilon):
 #    # print(y)
 #
 #    val_etats = np.array(val_etats)
-#    val_etats = np.reshape(val_etats,(nbLignes,nbCol))
+#    val_etats = np.reshape(val_etats,(len(g),len(g[0])))
 #
 #    m.setObjective(np.sum(val_etats), grb.GRB.MINIMIZE)
 #    print((val_etats.shape))
-#    for i in range(nbLignes):
-#        for j in range(nbCol):
-#            for action in liste_actions:
-#                if i == len(g) - 1 and j == len(g[0]) - 1:
-#                    r = 1000
-#                else : 
-#                    r = -g[i][j]
+#    for i in range(len(g)):
+#        for j in range(len(g[0])):
+#            for action in liste_actions: 
+#                r = -g[i][j][1]
 #                m.addConstr(val_etats[i][j] >= r + gamma * ot.sum_p_v(g, val_etats, i, j, p, action))
 #
 #    m.optimize()
 #
 #    # for v in m.getVars():
 #    #     print('%s %g' % (v.varName, v.x))
-#    val_etats = np.reshape(np.array([v.x for v in m.getVars()]),(nbLignes,nbCol))
+#    val_etats = np.reshape(np.array([v.x for v in m.getVars()]),(len(g),len(g[0])))
 #    # print(val_etats)
 #    # print(val_etats.shape)
 #
@@ -148,30 +142,40 @@ def iteration_de_la_politique(g,p,gamma,epsilon):
 #    # Affiche le pl dans un fichier
 #    # m.write('debug.lp')
 #
-#    d = np.zeros((nbLignes, nbCol))
+#    d = np.zeros((len(g), len(g[0])))
 #    for i in range(len(val_etats)):
 #        for j in range(len(val_etats[0])):
 #            val_par_action = np.zeros(len(liste_actions))
 #            for action in liste_actions:
 #                    val_par_action[action] = r + gamma * ot.sum_p_v(g, val_etats, i, j, p, action)
 #            d[i][j] = np.argmax(val_par_action)
-#    return d, val_etats
-#
+#    end = tm.time()
+#    time = end - start
+#    # TODO  : récupérer le nombre d'iteration
+#    return d, val_etats, time
 
-#rewards = [-5, -1, -2, -3, -4, 1000]
-#liste_actions = [0, 1, 2, 3]
+
+#
+#grille = gr.Grille(10,10,2,0.2,0.2,0.2,0.2,0.2,[0,1,2,3,4], 1000)
 #p = 0.6
 #gamma = 0.9
 #epsilon = 0.00001
-#d,v = pl(g, len(g), len(g[0]), liste_actions, rewards, p, gamma, epsilon)
-#print(d,v)
-#print(g)
-#
-#grille = grille.Grille(10,15,2,0.2,0.2,0.2,0.2,0.2,[0,1,2,3,4], 1000)
-#grille.Mafenetre.mainloop() #Affichage 
-#iteration_de_la_politique(grille.g,0.6,0.9,0.0001)
+
+## Test iteration de la valeur
+#d,v,t,time = iteration_de_la_valeur(grille.g,p,gamma,epsilon)
+#print(ot.from_action_to_dir(d,grille.g))
+##print(v)
+##print(t)
 #
 
-# TODO :  à mettre dans le rapport : résultats différents pour p=1 et p=0,6.
-# TODO : interface graphique chaleur. attractivité, repulsivite des cases
-# en fonction du notbre de fleches qui en partent et y arrivent
+## Test iteration de la politique
+#d,v,t,time = iteration_de_la_politique(grille.g,p,gamma,epsilon)
+#print(ot.from_action_to_dir(d,grille.g))
+
+# Test PL
+#d,v,time = pl(grille.g, p, gamma, epsilon)
+#print(ot.from_action_to_dir(d,g))
+
+#grille.Mafenetre.mainloop() #Affichage 
+
+

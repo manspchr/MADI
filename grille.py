@@ -1,10 +1,17 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Jan  7 10:08:49 2018
+
+@author: Manon
+"""
+
 import tkinter as tk
 import numpy as np
 import random
 
 class Grille():    
     def __init__(self,nbLignes,nbCol,zoom,pblanc,pverte,pbleue,prouge,pnoire,couts,reward):
-        
         self.nbLignes = nbLignes
         self.nbCol = nbCol
         self.zoom = zoom
@@ -14,14 +21,13 @@ class Grille():
         self.prouge = prouge
         self.pnoire = pnoire
         
-        self.g = np.zeros((nbLignes,nbCol), dtype=np.int)
-        self.cost = [0]*5
-        self.weight= np.ones(5, dtype=np.int)
-        self.weight[0]=0
-        
-        # on définit les couts pour
         self.reward = reward
         self.couts = couts
+        
+        self.g = np.zeros((nbLignes,nbCol,2), dtype=np.int)
+        self.cost = [0]*6
+        self.weight= np.ones(6, dtype=np.int)
+        self.weight[0]=0
         
         
 #         self.PosX = PosX
@@ -41,7 +47,7 @@ class Grille():
         
         self.Canevas.focus_set()
         self.Canevas.bind('<Key>',self.Clavier)
-        self.Canevas.pack(padx =5, pady =5)
+        self.Canevas.pack(padx =6, pady =6)
         
         #ajout des boutons
         self.init_boutton()
@@ -65,60 +71,57 @@ class Grille():
     
     #coloration grille 
     def colordraw(self):
-#        random.seed(1)      
-#        np.random.seed(1)
-#        
-#        
         mygreen="#1AD22C"
         myblue="#0B79F7"
-        tk.mygrey="#E8E8EB"
+        #mygrey="#E8E8EB"
         myblack="#5E5E64"
         mywhite="#FFFFFF"
         myred="#F70B42"
         
+        mytarget="magenta"
+        
         mywalls="#5E5E64"
-        tk.need_init = True
-        color=[mywhite,mygreen,myblue,myred,myblack]
+        #need_init = True
+        color=[mywhite,mygreen,myblue,myred,myblack,mytarget]
         for i in range(self.nbLignes):
             for j in range(self.nbCol):
                 y =self.zoom*20*i+20
                 x =self.zoom*20*j+20
                 # pas de mur sur la premiere case et ses alentours 
                 # idem pour l'objectif
-                if (i==0 and j==0) or (i==0 and j==1) or (i==1  and j==0) or (i==len(self.g)-1 and j==len(self.g[0])-1) or (i==len(self.g)-2 and j==len(self.g[0])-1) or (i==len(self.g)-1 and j==len(self.g[0])-2):
+                if (i==0 and j==0) or (i==0 and j==1) or (i==1  and j==0) or (i==len(self.g)-2 and j==len(self.g[0])-1) or (i==len(self.g)-1 and j==len(self.g[0])-2):
 #                     print(i,j)
-                    c = np.random.randint(1,3+1)
-                    cout_case = self.couts[c]
-                    if (i==len(self.g)-1 and j==len(self.g[0])-1):
-                        ## dernière case : on met le reward à 1000
-                        cout_case = - self.reward
+                    c = np.random.random_integers(3)
+                elif (i==len(self.g)-1 and j==len(self.g[0])-1):
+                    # on est à la case cible
+                    c=5       
                 else :
                     z= random.uniform(0,1)
-
                     if z < self.pblanc:
-                        #couleur c, rewards r
                         c=0
-                        cout_case= self.couts[c]
                     else:
                         if z < self.pblanc+ self.pverte:
                             c=1
-                            cout_case= self.couts[c]
-
                         else:
                             if z < self.pblanc+ self.pverte + self.pbleue:
                                 c=2
-                                cout_case= self.couts[c]
                             else:
                                 if z< self.pblanc+ self.pverte + self.pbleue +self.prouge:
                                     c=3
-                                    cout_case= self.couts[c]
                                 else:
-                                    c=4
-                                    cout_case= self.couts[c]
+                                    c=4 
 
                 if c>0:
-                    self.g[i,j]=cout_case
-                    self.Canevas.create_oval(x+self.zoom*(10-3),y+self.zoom*(10-3),x+self.zoom*(10+3),y+self.zoom*(10+3),width=1,outline=color[c],fill=color[c])
+                    # on definit la couleur
+                    self.g[i,j,0]=c
+                    # on definit le gain
+                    if (i==len(self.g)-1 and j==len(self.g[0])-1):
+                        # on est à la case cible
+                        # on met le reward à 1000
+                        self.g[i,j,1]= - self.reward
+                    else :
+                        self.g[i,j,1]=self.couts[c]
+                    self.Canevas.create_oval(x+self.zoom*(10-3),y+self.zoom*(10-3),x+self.zoom*(10+3),y+self.zoom*(10+3),width=1,outline=color[c],fill=color[c])    
                 else:
                     self.Canevas.create_rectangle(x, y, x+self.zoom*20, y+self.zoom*20, fill=mywalls)
         
@@ -137,7 +140,7 @@ class Grille():
         
     #bouton restart 
     def restart(self):
-        self.cost = [0]*5
+        self.cost = [0]*6
         self.PosX = 20+10*self.zoom
         self.PosY = 20+10*self.zoom
         self.Canevas.coords(self.Pion,self.PosX - 9*self.zoom, self.PosY -9*self.zoom, self.PosX +9*self.zoom, self.PosY +9*self.zoom )
@@ -145,6 +148,7 @@ class Grille():
         self.wb.config(text=str(self.cost[2]))
         self.wr.config(text=str(self.cost[3]))
         self.wn.config(text=str(self.cost[4]))
+        self.wm.config(text=str(self.cost[5]))
         self.ws.config(text='     total = '+str(self.cost[0]))
         
         
@@ -161,51 +165,51 @@ class Grille():
                 else :
                     if touche == 'm' :
                         self.droite(li,cj)
-
                     else:
                         print('touche invalide')
 
         # on dessine le pion a sa nouvelle position
         self.Canevas.coords(self.Pion,self.PosX - 9*self.zoom, self.PosY -9*self.zoom, self.PosX +9*self.zoom, self.PosY +9*self.zoom )
         self.cost[0]=0    
-        for k in range(4):
+        for k in range(5):
             self.cost[0]+=self.cost[k+1]*self.weight[k+1]        
         self.wg.config(text=str(self.cost[1]))
         self.wb.config(text=str(self.cost[2]))
         self.wr.config(text=str(self.cost[3]))
         self.wn.config(text=str(self.cost[4]))
+        self.wm.config(text=str(self.cost[5]))
         self.ws.config(text='     total = '+str(self.cost[0]))
 
 
     def haut(self,li,cj):
         # deplacement vers le haut
-        if li>0 and self.g[li-1,cj]!=0:
+        if li>0 and self.g[li-1,cj,0]>0:
             self.PosY -= 20*self.zoom
-            self.cost[self.g[li-1,cj]]+= self.g[li-1,cj]  
+            self.cost[self.g[li-1,cj,0]]+= self.g[li-1,cj,1]  
         else:
             print('deplacement imposiible')
 
     def bas(self,li,cj):
            # deplacement vers le bas
-        if li<self.nbLignes-1 and self.g[li+1,cj]!=0:
+        if li<self.nbLignes-1 and self.g[li+1,cj,0]>0:
             self.PosY += 20*self.zoom
-            self.cost[self.g[li+1,cj]]+=self.g[li+1,cj]
+            self.cost[self.g[li+1,cj,0]]+=self.g[li+1,cj,1]
         else:
             print('deplacement imposiible')
         
     def droite(self,li,cj):
         # deplacement vers la droite
-        if cj< self.nbCol-1 and self.g[li,cj+1]!=0:
+        if cj< self.nbCol-1 and self.g[li,cj+1,0]>0:
             self.PosX += 20*self.zoom
-            self.cost[self.g[li,cj+1]]+=self.g[li,cj+1] 
+            self.cost[self.g[li,cj+1,0]]+=self.g[li,cj+1,1] 
         else:
             print('deplacement imposiible')
         
     def gauche(self,li,cj):
         # deplacement vers la gauche
-        if cj >0 and self.g[li,cj-1]!=0:
+        if cj >0 and self.g[li,cj-1,0]>0:
             self.PosX -= 20*self.zoom
-            self.cost[self.g[li,cj-1]]+=self.g[li,cj-1] 
+            self.cost[self.g[li,cj-1,0]]+=self.g[li,cj-1,1] 
         else:
             print('deplacement imposiible')
             
@@ -261,6 +265,7 @@ class Grille():
         myblack="#5E5E64"
         #mywhite="#FFFFFF"
         myred="#F70B42"
+        mytarget="magenta"
         self.w = tk.Label(self.Mafenetre, text='     Costs: ', fg=myblack,font = "Verdana "+str(int(5*self.zoom))+" bold")
         self.w.pack(side=tk.LEFT,padx=5,pady=5) 
         self.wg = tk.Label(self.Mafenetre, text=str(self.cost[1]),fg=mygreen,font = "Verdana "+str(int(5*self.zoom))+" bold")
@@ -271,11 +276,13 @@ class Grille():
         self.wr.pack(side=tk.LEFT,padx=5,pady=5) 
         self.wn = tk.Label(self.Mafenetre, text=str(self.cost[4]),fg=myblack,font = "Verdana "+str(int(5*self.zoom))+" bold")
         self.wn.pack(side=tk.LEFT,padx=5,pady=5) 
+        self.wm = tk.Label(self.Mafenetre, text=str(self.cost[5]),fg=mytarget,font = "Verdana "+str(int(5*self.zoom))+" bold")
+        self.wm.pack(side=tk.LEFT,padx=5,pady=5)                
         self.ws = tk.Label(self.Mafenetre, text='     total = '+str(self.cost[0]),fg=myblack,font = "Verdana "+str(int(5*self.zoom))+" bold")
         self.ws.pack(side=tk.LEFT,padx=5,pady=5) 
     
-
-#        
+#
+#
 #pblanc=0.1
 #pverte=0.3
 #pbleue=0.25
@@ -283,7 +290,3 @@ class Grille():
 #pnoire=0.15
 #g = Grille(5,5,2,pblanc,pverte,pbleue,prouge,pnoire,[0,1,2,3,4],1000)
 #g.Mafenetre.mainloop()
-
-# TODO : faire varier les couts, tels que ce soient une entree
-#couts = [0,1,2,3,4,1000]
-# definition des couts

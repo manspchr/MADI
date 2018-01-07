@@ -10,6 +10,7 @@ Created on Thu Dec 28 13:42:25 2017
 
 
 import numpy as np
+import random
 # cases dispo prenant en compte les limite 
 # pas les murs !!!
 
@@ -18,11 +19,9 @@ import numpy as np
 # 2 : bas
 # 3 :haut
 
-# Nouvelle fonction case dispo :
-# elle renvoit un vecteur de trois cases (dont les coordonnées peuvent ne pas 
-# être dans la grille)
-# qui correspondent aux trois cases "théoriques" que pourraient atteindre le
-# pion. Selon la position du pion, certaines sont rendus inaccessibles
+
+# fonction qui considère les trois cases possiblement atteignable lors d'une action
+# et qui leur associe 1 si elles sont dans la grille, 0 sinon
 # TODO : utiliser is in grid pour simplifier la fonction
 def cases_dispo(g,i,j,action):
     cases = np.zeros((3,3))
@@ -64,32 +63,36 @@ def cases_dispo(g,i,j,action):
                 cases[2][2]=1           
     return cases
 
-#cases_dispo(g,9,0,2)
-
+# Fonction qui teste si un point i j est dans la grille g
 def is_in_grid(g, i, j):
     if 0<=i and i < len(g) and 0<=j and j < len(g[0]) :
         return True
     else : 
         return False
 
-#Calcul des probas d'aller en x et a droite et a gauche de x 
-#prend en compte l'incertain
-# i et j sont les coordonnées du point d'origine
+
+# Fonction qui renvoie pour une action donnée une matrice indiquand pour chaque case
+        # accessible après une action action depuis ij la probabilité d'y arriver effectivement
 def probas_action(g,i,j,p,action):
+    # on recupère le vecteurs des cases visées : 0 si la case est hors de la grill
+    # 1 sinon
     cases = cases_dispo(g,i,j,action)
-        
+      
+    ## on est dans le cas grille_avec_chiffre
     if (len(g.shape)== 3) :   
-        for i,case in enumerate(cases):
-            print(case)
-            if is_in_grid(g, case[0], case[1]) and g[case[0]][case[1]][0] == 0 :
-                case[2] = 0
-    
+        for i,case in enumerate(cases):# pour chaque case
+            # si elle est accessible mais que c'est un mur
+            if case[2]==1 and g[case[0]][case[1]][0] == 0 :
+                case[2] = 0 # on la rend inaccessible
+                
+    ## on est dans le cas grille simple
     else :
-        for i,case in enumerate(cases):
-            #print(case)
+        for i,case in enumerate(cases): # pour chacune case
+            # si elle est accessible mais que c'est un mur
             if is_in_grid(g, case[0], case[1]) and g[case[0]][case[1]] == 0 :
-                case[2] = 0
-    #terme du milieu est un mur
+                case[2] = 0 # on la rend inaccessible
+                
+    #si la case du milieu (celle visee est un mur) : toutes les probas sont mises à 0
     if cases[1][2] == 0:
         cases[0][2] = 0
         cases[1][2] = 0
@@ -113,11 +116,26 @@ def probas_action(g,i,j,p,action):
                 cases[0][2] = (1-p)/2
                 cases[1][2] = p
                 cases[2][2] = (1-p)/2   
-   # print(cases)
     return cases
 
-# probas_action(g,0,0,0.25,1)
 
+# Fonction qui tire une case arrivée selon la case de depart, l'action, l'état et la probabilité
+def deplacement_probabiliste(g,i,j,p,action):
+    # on récupère les probabilités de chaque case
+    cases = probas_action(g,i,j,p,action)
+    z = random.uniform(0,1)
+    new_i =0
+    new_j =0
+    if z<cases[0][2] :
+        new_i = cases[0][0]
+        new_j = cases[0][1]
+    elif z<cases[0][2]+cases[1][2]:
+        new_i = cases[1][0]
+        new_j = cases[1][1]
+    else :
+        new_i = cases[2][0]
+        new_j = cases[2][1]
+    return(new_i,new_j)
 
 # Méthode qui prend en entrée une matrice de politique et qui en ressort
 # un affichage simplifié de cette politique
@@ -125,7 +143,8 @@ def from_action_to_dir(matrix, g):
     result = np.zeros((len(matrix), len(matrix[0])), dtype=str)
     for i in range(len(matrix)):
         for j in range(len(matrix[0])):
-            if g[i][j] == 0 : # on est sur un mur
+            if (len(g.shape)== 3 and g[i][j][0] == 0) or (len(g.shape)== 2 and g[i][j] == 0):   # on est dans le cas de la grille avec chiffres
+                # selon la grille
                 result[i][j]='x'
             else :
                 if matrix[i][j]==0:
@@ -148,10 +167,3 @@ def sum_p_v(g,val_etats,i,j,p,action):
             somme += c[2] * val_etats[c[0]][c[1]]
     return somme
 
-     
-
-# val_etats =  np.random.rand(10,15)
-# sum_p_v(g,val_etats,0,0,0.25,1
-
-#renvoi reward apres l'action
-# None si action hors limite
