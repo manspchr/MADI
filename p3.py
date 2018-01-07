@@ -200,7 +200,7 @@ def pl_part3_2(g,liste_actions,rewards,p,gamma,epsilon):
   
     m.optimize()
 
-## TODO : tester la forme de x_sa et voir si on peut se ramener à x_sa_2, à renvoyer à la place
+## TODO : tester la forme de x_sa et voir si on peut se ramener à x_sa_2, à renvoyer 
 #    x_sa = np.reshape(np.array([v.x for v in m.getVars()]),(len(g),len(g[0])))
 #    # print(x_sa)
 #    # print(x_sa.shape)
@@ -220,21 +220,14 @@ p = 0.6
 gamma = 0.9
 epsilon = 0.00001
 
-# Test iteration de la valeur
-#d,v,t,time = iteration_de_la_valeur(grille.g,p,gamma,epsilon)
-#print(ot.from_action_to_dir(d,grille.g))
-
-## Test iteration de la politique
-#d,v,t,time = iteration_de_la_politique(grille.g,p,gamma,epsilon)
-#print(ot.from_action_to_dir(d,grille.g))
-
 # Test PL
 #d,v,time = pl_part3_1(grille.g, p, gamma, epsilon)
 #print(ot.from_action_to_dir(d,g))
 
-#grille.Mafenetre.mainloop() #Affichage 
+#d,v,time = pl_part3_1(grille.g, p, gamma, epsilon)
+#print(ot.from_action_to_dir(d,g))
 
-#print(mean_experienced_cost(d,grille.g,p,10))
+
 
 
     
