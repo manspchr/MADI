@@ -137,6 +137,25 @@ def deplacement_probabiliste(g,i,j,p,action):
         new_j = cases[2][1]
     return(new_i,new_j)
 
+
+# Fonction qui a partir d'une sortie delta des PL de la partie trois et d'une 
+    # position dans la grille retourne une action tiree aleatoire 
+def get_randomized_action(delta,i,j):
+    # on récupère les probabilités d'action sur la case
+    pb_action = delta[i][j]
+    # on tire une action :
+    z = random.uniform(0,1)
+    if z<pb_action[0]:
+        action = 0
+    elif z < pb_action[0]+pb_action[1]:
+        action = 1
+    elif z < pb_action[0]+pb_action[1]+ pb_action[2]:
+        action = 2
+    else :
+        action = 3
+    return(action)
+
+
 # Méthode qui prend en entrée une matrice de politique et qui en ressort
 # un affichage simplifié de cette politique
 def from_action_to_dir(matrix, g):
@@ -192,4 +211,30 @@ def mean_experienced_cost(d,g,p,nbr_experience):
     mean_cost = [x/nbr_experience for x in cost] 
     return mean_cost
      
+def mean_experienced_cost_p3(d,g,p,nbr_experience):
+    mean_cost =[0]*5
+    for i in range(nbr_experience):
+        ## pour chacune des nbr_experiences
+        i = 0
+        j = 0
+        cost = [0]*5
+        while not (i == len(g)-1 and j == len(g[0])-1)  :
+            # tant qu'on est pas à la dernière case et que la destination appartient à la grille
+            direction = get_randomized_action(d,i,j)
+            i,j = deplacement_probabiliste(g,i,j,p,direction)
+            #print(str(i)+" "+str(j))
+            if not is_in_grid(g,i,j): # si la destination n'est pas dans la grille
+                break
+            if (i == len(g)-1 and j == len(g[0])-1)  :
+                break
+            cost[g[i][j][0]]+=g[i][j][1]
+        #cout total    
+        cost[0]=cost[1]+cost[2]+cost[3]+cost[4]
+        #print(cost)
+        mean_cost = [sum(x) for x in zip(cost, mean_cost)]
+        #print(mean_cost)
+    mean_cost = [x/nbr_experience for x in cost] 
+    return mean_cost
+     
+
 
