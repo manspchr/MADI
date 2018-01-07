@@ -270,12 +270,12 @@ class Grille_avec_chiffres():
         self.ws = tk.Label(self.Mafenetre, text='     total = '+str(self.cost[0]),fg=myblack,font = "Verdana "+str(int(5*self.zoom))+" bold")
         self.ws.pack(side=tk.LEFT,padx=5,pady=5) 
     
-
-
+#
+#
 #pblanc=0.1
-pverte=0.3
-pbleue=0.25
-prouge=0.2
-pnoire=0.15
-g = Grille_avec_chiffres(5,5,2,pblanc,pverte,pbleue,prouge,pnoire,1000)
-g.Mafenetre.mainloop()
+#pverte=0.3
+#pbleue=0.25
+#prouge=0.2
+#pnoire=0.15
+#g = Grille_avec_chiffres(5,5,2,pblanc,pverte,pbleue,prouge,pnoire,1000)
+#g.Mafenetre.mainloop()
